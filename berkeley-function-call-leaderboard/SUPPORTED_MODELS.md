@@ -119,6 +119,7 @@ For model names containing `{...}`, multiple versions are available. For example
 | Phi-4-mini-instruct                    | Prompt           | Self-hosted 💻 | microsoft/Phi-4-mini-instruct                               |
 | Qwen/QwQ-32B                           | Function Calling | Novita AI      | qwen/qwq-32b-FC-novita                                      |
 | Qwen/QwQ-32B                           | Prompt           | Novita AI      | qwen/qwq-32b-novita                                         |
+| Qwen2.5-7B-Instruct                    | Function Calling | Self-hosted 💻 | Qwen/Qwen2.5-7B-Instruct-FC                                 |
 | Qwen3-{0.6B,1.7B,4B,8B,14B,32B}        | Function Calling | Qwen           | qwen3-{0.6b,1.7b,4b,8b,14b,32b}-FC                          |
 | Qwen3-{0.6B,1.7B,4B,8B,14B,32B}        | Prompt           | Qwen           | qwen3-{0.6b,1.7b,4b,8b,14b,32b}                             |
 | Qwen3-{0.6B,1.7B,8B,14B,32B}           | Function Calling | Self-hosted 💻 | Qwen/Qwen3-{0.6B,1.7B,8B,14B,32B}-FC                        |
