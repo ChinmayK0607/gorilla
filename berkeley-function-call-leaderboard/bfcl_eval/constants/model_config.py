@@ -57,6 +57,7 @@ from bfcl_eval.model_handler.local_inference.quick_testing_oss import (
     QuickTestingOSSHandler,
 )
 from bfcl_eval.model_handler.local_inference.qwen import QwenHandler
+from bfcl_eval.model_handler.local_inference.qwen2_5fc import Qwen2_5FCHandler
 from bfcl_eval.model_handler.local_inference.qwen_fc import QwenFCHandler
 from bfcl_eval.model_handler.local_inference.nanbeige_fc import NanbeigeFCHandler
 from bfcl_eval.model_handler.local_inference.salesforce_llama import (
@@ -1558,6 +1559,18 @@ local_inference_model_map = {
         output_price=None,
         is_fc_model=True,
         underscore_to_dot=True,
+    ),
+    "Qwen/Qwen2.5-7B-Instruct-FC": ModelConfig(
+        model_name="Qwen/Qwen2.5-7B-Instruct",
+        display_name="Qwen2.5-7B-Instruct (FC)",
+        url="https://huggingface.co/Qwen/Qwen2.5-7B-Instruct",
+        org="Qwen",
+        license="apache-2.0",
+        model_handler=Qwen2_5FCHandler,
+        input_price=None,
+        output_price=None,
+        is_fc_model=True,
+        underscore_to_dot=False,
     ),
     "Qwen/Qwen3-0.6B-FC": ModelConfig(
         model_name="Qwen/Qwen3-0.6B",
