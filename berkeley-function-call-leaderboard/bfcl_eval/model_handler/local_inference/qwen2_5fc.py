@@ -101,18 +101,32 @@ class Qwen2_5FCHandler(OSSHandler):
                 for tool_call in tool_calls:
                     if hasattr(tool_call, "function"):
                         tool_call = tool_call.function
-                    elif "function" in tool_call:
+                    elif isinstance(tool_call, dict) and "function" in tool_call:
                         tool_call = tool_call["function"]
+
+                    name = (
+                        getattr(tool_call, "name", None)
+                        if not isinstance(tool_call, dict)
+                        else tool_call.get("name")
+                    )
+                    arguments = (
+                        getattr(tool_call, "arguments", None)
+                        if not isinstance(tool_call, dict)
+                        else tool_call.get("arguments")
+                    )
+                    if not name:
+                        # Skip malformed tool calls to avoid crashing the prompt builder.
+                        continue
 
                     formatted_prompt += "\n"
                     formatted_prompt += '<tool_call>\n{"name": "'
-                    formatted_prompt += tool_call["name"]
+                    formatted_prompt += name
                     formatted_prompt += '", "arguments": '
 
-                    if isinstance(tool_call["arguments"], str):
-                        formatted_prompt += tool_call["arguments"]
+                    if isinstance(arguments, str):
+                        formatted_prompt += arguments
                     else:
-                        formatted_prompt += json.dumps(tool_call["arguments"])
+                        formatted_prompt += json.dumps(arguments or {})
 
                     formatted_prompt += "}\n</tool_call>"
 
