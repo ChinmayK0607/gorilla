@@ -55,6 +55,36 @@ def get_args():
         default=None,
         help="Specify the path to a local directory containing the model's config/tokenizer/weights for fully offline inference. Use this only if the model weights are stored in a location other than the default HF_HOME directory.",
     )
+    parser.add_argument(
+        "--verifier",
+        action="store_true",
+        default=False,
+        help="Enable verifier mode: use a verifier model to score existing trajectories.",
+    )
+    parser.add_argument(
+        "--verifier-target-model",
+        type=str,
+        default=None,
+        help="Model name (registry) whose trajectories will be verified.",
+    )
+    parser.add_argument(
+        "--verifier-output-dir",
+        type=str,
+        default=None,
+        help="Directory (relative to project root) to write verifier results; defaults to result_verifier.",
+    )
+    parser.add_argument(
+        "--verifier-base-url",
+        type=str,
+        default=None,
+        help="Base URL for the verifier model's OpenAI-compatible endpoint (e.g., http://localhost:8000/v1).",
+    )
+    parser.add_argument(
+        "--verifier-api-key",
+        type=str,
+        default=None,
+        help="API key for the verifier endpoint; defaults to VERIFIER_API_KEY env var or 'EMPTY'.",
+    )
     args = parser.parse_args()
 
     return args
@@ -333,6 +363,12 @@ def generate_results(args, model_name, test_cases_total):
 
 
 def main(args):
+
+    # Verifier shortcut
+    if getattr(args, "verifier", False):
+        from bfcl_eval.verifier_mode import run_verifier_mode
+
+        return run_verifier_mode(args)
 
     # Note: The following environment variables are needed for the memory vector store implementation
     # Otherwise you get segfault or huggingface tokenizer warnings

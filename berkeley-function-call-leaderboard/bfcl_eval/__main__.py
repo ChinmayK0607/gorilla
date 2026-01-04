@@ -148,6 +148,31 @@ def generate(
         "--run-ids",
         help="If true, also run the test entry mentioned in the test_case_ids_to_generate.json file, in addition to the --test_category argument.",
     ),
+    verifier: bool = typer.Option(
+        False,
+        "--verifier",
+        help="Run verifier mode: use a verifier model to score existing trajectories instead of generating new ones.",
+    ),
+    verifier_target_model: Optional[str] = typer.Option(
+        None,
+        "--verifier-target-model",
+        help="Registry name of the model whose trajectories will be verified (required when --verifier is used).",
+    ),
+    verifier_output_dir: Optional[str] = typer.Option(
+        None,
+        "--verifier-output-dir",
+        help="Relative path (from project root) to write verifier results; defaults to result_verifier.",
+    ),
+    verifier_base_url: Optional[str] = typer.Option(
+        None,
+        "--verifier-base-url",
+        help="Base URL for the verifier model's OpenAI-compatible endpoint (e.g., http://localhost:8000/v1).",
+    ),
+    verifier_api_key: Optional[str] = typer.Option(
+        None,
+        "--verifier-api-key",
+        help="API key for the verifier endpoint; defaults to VERIFIER_API_KEY env var or 'EMPTY'.",
+    ),
 ):
     """
     Generate the LLM response for one or more models on a test-category (same as openfunctions_evaluation.py).
@@ -168,6 +193,11 @@ def generate(
         result_dir=result_dir,
         allow_overwrite=allow_overwrite,
         run_ids=run_ids,
+        verifier=verifier,
+        verifier_target_model=verifier_target_model,
+        verifier_output_dir=verifier_output_dir,
+        verifier_base_url=verifier_base_url,
+        verifier_api_key=verifier_api_key,
     )
     load_dotenv(dotenv_path=DOTENV_PATH, verbose=True, override=True)  # Load the .env file
     generation_main(args)

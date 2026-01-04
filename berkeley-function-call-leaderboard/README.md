@@ -12,19 +12,20 @@
     - [Configuring Project Root Directory](#configuring-project-root-directory)
     - [Setting up Environment Variables](#setting-up-environment-variables)
       - [Configuring SerpAPI for Web Search Category](#configuring-serpapi-for-web-search-category)
-  - [Running Evaluations](#running-evaluations)
-    - [Generating LLM Responses](#generating-llm-responses)
-      - [Selecting Models and Test Categories](#selecting-models-and-test-categories)
-      - [Selecting Specific Test Cases with `--run-ids`](#selecting-specific-test-cases-with---run-ids)
-      - [Output and Logging](#output-and-logging)
-      - [For API-based Models](#for-api-based-models)
-      - [For Locally-hosted OSS Models](#for-locally-hosted-oss-models)
-        - [For Pre-existing OpenAI-compatible Endpoints](#for-pre-existing-openai-compatible-endpoints)
-      - [(Alternate) Script Execution for Generation](#alternate-script-execution-for-generation)
-    - [Evaluating Generated Responses](#evaluating-generated-responses)
-      - [Output Structure](#output-structure)
-      - [(Optional) WandB Evaluation Logging](#optional-wandb-evaluation-logging)
-      - [(Alternate) Script Execution for Evaluation](#alternate-script-execution-for-evaluation)
+- [Running Evaluations](#running-evaluations)
+  - [Generating LLM Responses](#generating-llm-responses)
+    - [Selecting Models and Test Categories](#selecting-models-and-test-categories)
+    - [Selecting Specific Test Cases with `--run-ids`](#selecting-specific-test-cases-with---run-ids)
+    - [Output and Logging](#output-and-logging)
+    - [For API-based Models](#for-api-based-models)
+    - [For Locally-hosted OSS Models](#for-locally-hosted-oss-models)
+      - [For Pre-existing OpenAI-compatible Endpoints](#for-pre-existing-openai-compatible-endpoints)
+    - [(Alternate) Script Execution for Generation](#alternate-script-execution-for-generation)
+  - [Verifier Mode: Scoring Existing Trajectories](#verifier-mode-scoring-existing-trajectories)
+  - [Evaluating Generated Responses](#evaluating-generated-responses)
+    - [Output Structure](#output-structure)
+    - [(Optional) WandB Evaluation Logging](#optional-wandb-evaluation-logging)
+    - [(Alternate) Script Execution for Evaluation](#alternate-script-execution-for-evaluation)
   - [Contributing \& How to Add New Models](#contributing--how-to-add-new-models)
   - [Additional Resources](#additional-resources)
 
@@ -254,6 +255,46 @@ python -m bfcl_eval.openfunctions_evaluation --model MODEL_NAME --test-category 
 ```
 
 When specifying multiple models or test categories, separate them with **spaces**, not commas. All other flags mentioned earlier are compatible with the script execution method as well.
+
+### Verifier Mode: Scoring Existing Trajectories
+
+Use `--verifier` to score **existing trajectories** with a dedicated verifier model instead of generating new traces. This is useful for comparing how well a model’s tool calls align with ground truth without re-running inference.
+
+**Prerequisites**
+- Target model trajectories already exist under `result/TARGET_MODEL/...` (or another directory passed via `--result-dir`).
+- A verifier endpoint that speaks the OpenAI Chat Completions API. By default, the CLI builds the URL from `VERIFIER_BASE_URL` (or `LOCAL_SERVER_ENDPOINT`/`LOCAL_SERVER_PORT`, falling back to `http://localhost:1053/v1`). Provide `VERIFIER_API_KEY` in `.env` or pass `--verifier-api-key`.
+- The verifier model is specified with `--model` (only one verifier model is allowed), and the trajectories to inspect are named via `--verifier-target-model` (use the same registry name you used during generation).
+
+**Example: start a verifier server and run meta-eval**
+```bash
+# Spin up an OpenAI-compatible endpoint for the verifier model (e.g., Qwen)
+CUDA_VISIBLE_DEVICES=0,1,2,3 \
+vllm serve Qwen/Qwen2.5-7B-Instruct \
+  --tensor-parallel-size 4 \
+  --host 0.0.0.0 \
+  --port 8000 \
+  --dtype auto
+
+# Score previously generated multi-turn trajectories for the target model
+bfcl generate --verifier \
+  --model Qwen/Qwen2.5-7B-Instruct-FC \
+  --verifier-target-model Qwen/Qwen2.5-7B-Instruct-FC \
+  --test-category multi_turn_base,multi_turn_miss_func,multi_turn_miss_param \
+  --skip-server-setup \
+  --verifier-base-url http://localhost:8000/v1 \
+  --temperature 0.0
+```
+
+**Key flags**
+- `--verifier-output-dir`: Where to write verifier outputs (default: `result_verifier/`).
+- `--result-dir`: Where to read target trajectories (default: `result/` under project root).
+- `--verifier-base-url`, `--verifier-api-key`: Override the verifier endpoint details if they’re not in `.env`.
+- `--test-category`: Comma-separated list of categories to verify (matches the categories used during generation).
+
+**Outputs**
+- Per-category verifier traces live at `result_verifier/VERIFIER_MODEL/<category>/..._verifier_result.json`.
+- Per-category meta-accuracy files live at `score_verifier/VERIFIER_MODEL/<category>/..._verifier_score.json`.
+- An aggregate summary is written to `score_verifier/VERIFIER_MODEL/verifier_meta_summary.json`.
 
 ### Evaluating Generated Responses
 

@@ -21,6 +21,8 @@ PROJECT_ROOT = Path(os.getenv("BFCL_PROJECT_ROOT", Path(__file__).resolve().pare
 
 RESULT_PATH = PROJECT_ROOT / "result"
 SCORE_PATH = PROJECT_ROOT / "score"
+RESULT_VERIFIER_PATH = PROJECT_ROOT / "result_verifier"
+SCORE_VERIFIER_PATH = PROJECT_ROOT / "score_verifier"
 DOTENV_PATH = PROJECT_ROOT / ".env"
 TEST_IDS_TO_GENERATE_PATH = PROJECT_ROOT / "test_case_ids_to_generate.json"
 # Directory that stores all lock files (kept out of the results tree)
@@ -34,10 +36,13 @@ UTILS_PATH = PACKAGE_ROOT / "scripts"
 FORMAT_SENSITIVITY_IDS_PATH = PROMPT_PATH / f"{VERSION_PREFIX}_format_sensitivity.json"
 
 RESULT_FILE_PATTERN = f"{VERSION_PREFIX}_*_result.json"
+VERIFIER_RESULT_FILE_PATTERN = f"{VERSION_PREFIX}_*_verifier_result.json"
 
 RED_FONT = "\033[91m"
 RESET = "\033[0m"
 
 RESULT_PATH.mkdir(parents=True, exist_ok=True)
 SCORE_PATH.mkdir(parents=True, exist_ok=True)
+RESULT_VERIFIER_PATH.mkdir(parents=True, exist_ok=True)
+SCORE_VERIFIER_PATH.mkdir(parents=True, exist_ok=True)
 LOCK_DIR.mkdir(parents=True, exist_ok=True)
